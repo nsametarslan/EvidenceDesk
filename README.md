@@ -2,9 +2,17 @@
 
 **Authentication evidence, organised for a defensible next step.**
 
-A local investigation workspace that turns exported sign-in events into transparent review candidates, evidence timelines and portable case notes. Built for defensive learning and small, authorised offline investigations—not live monitoring or automated incident response.
+A local Python / Flask / SQLite workspace for reviewing exported sign-in events. See why a pattern was flagged, inspect its supporting events and leave a case note that travels with the evidence.
 
-![Real running workspace with synthetic data](docs/screenshots/workspace.png)
+**Import → validate → investigate → document → export.**
+
+Three transparent rules · UTC timelines · source fingerprints · persistent review notes.
+
+**Try it:** [install and run locally](#run-locally), then select **Load synthetic demo**. No account or API key needed.
+
+[Validation](docs/VALIDATION.md) · [Architecture](#architecture-and-trade-offs) · [Interview walkthrough](INTERVIEW_NOTES.md)
+
+![Running EvidenceDesk: synthetic authentication events and a selected review candidate](docs/screenshots/workspace-preview.jpg)
 
 ## The problem
 
@@ -100,8 +108,14 @@ The next milestone is one well-tested Windows authentication export adapter with
 
 ## Project context
 
-This is Nuhsamet Arslan's defensive portfolio project, developed with AI assistance. The code, test evidence and design notes are public so decisions can be inspected and discussed. It is not presented as professional SOC experience or a claim that every part was independently implemented. The earlier GitHub learning projects remain separate.
+EvidenceDesk is Nuhsamet Arslan's defensive portfolio project. The public code, demo, validation record and design notes make its behaviour and decisions inspectable.
 
-The project choice was informed by recurring duties in current SOC postings: first-level log review, contextual investigation and documented escalation. [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md) links the employer sources and records role-fit constraints; building this project does not satisfy those employers' degree, language or experience requirements.
+The project choice was informed by SOC role responsibilities: first-level log review, contextual investigation and documented escalation. Sources and role-fit constraints are recorded in [`docs/PROJECT_BRIEF.md`](docs/PROJECT_BRIEF.md).
+
+## Development note
+
+AI tools supported implementation, review, testing and documentation.
+
+## Licence
 
 MIT licence applies to this repository's source. Review and test it for your own authorised use.

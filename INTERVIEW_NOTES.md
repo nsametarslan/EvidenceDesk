@@ -1,6 +1,6 @@
 # Interview notes · Türkçe çalışma rehberi
 
-Bu proje AI desteğiyle geliştirildi. Görüşmede kendi katkını ve gerçekten anlayıp değiştirebildiğin bölümleri açıkça anlat. Aşağıdaki cevaplar birer açıklama örneği; üzerinde çalışmadan kişisel deneyim diye ezberleme.
+Bu rehber mimariyi kod üzerinden açıklamak ve demoda incelemek içindir. Cevapları kendi gözlemlerinle tamamla; gerçekten yaptığın katkıyı ve anlayıp değiştirebildiğin bölümleri anlat.
 
 ## Projeyi iki cümlede anlat
 
@@ -40,7 +40,7 @@ Python: doğrulama ve zaman penceresi mantığı okunabilir; bildiğin temele ya
 
 **Neyi henüz yapmıyor?** Native Windows/Linux/cloud parser yok; eşikler sabit; veri şifreleme, çok kullanıcı ve üretim testi yok. Eş zamanlı olayların nedensel sırası hash sırasından çıkarılamaz.
 
-**Senin katkın ne?** Gerçekte yaptığın katkıyı anlat: proje hedefini seçmek, AI yardımıyla uygulamak, belirli fonksiyonları incelemek/değiştirmek veya testleri açıklamak. Bu çalışma oturumunda otomasyonun yaptığı geliştirmeyi kendi bağımsız üretimin gibi anlatma.
+**Senin katkın ne?** Gerçekte yaptığın katkıyı anlat: problemi tanımlamak, belirli fonksiyonları incelemek veya değiştirmek, demo davranışını kontrol etmek ya da testlerin koruduğu sınırı açıklamak. Katkı örneklerini gerçekten yaptığın çalışmadan seç; bağımsız yazarlık veya deneyim iddiası ekleme.
 
 ## Gerçekten anlamak için 20 dakikalık çalışma
 
