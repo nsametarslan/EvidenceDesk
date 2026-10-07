@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf }}">
+  <title>EvidenceDesk · Authentication triage</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='workspace.css') }}">
+  <script defer src="{{ url_for('static', filename='workspace.js') }}"></script>
+</head>
+<body>
+<aside class="rail"><a class="brand" href="/" aria-label="EvidenceDesk home"><span class="mark">E<span>↗</span></span><b>EvidenceDesk</b></a>
+  <div class="rail-label">WORKSPACE</div><div class="nav-active">◈ <span>Authentication triage</span></div>
+  <div class="rail-note"><span class="dot"></span> Local workspace<br><small>Single user · No external lookups</small></div>
+  <div class="rail-bottom">EVIDENCE BEFORE ASSUMPTION<br><small>Defensive portfolio project · v0.1</small></div>
+</aside>
+<main>
+  <header><div><span class="eyebrow">SECURITY OPERATIONS / EVIDENCE WORKSPACE</span><h1>Authentication triage</h1><p>Turn a suspicious pattern into a reviewable case.</p></div><div class="head-label">LOCAL ONLY<span>Python / SQLite</span></div></header>
+  <section class="import-bar" aria-label="Evidence import">
+    <div><b>Start with the evidence</b><p>Import canonical CSV or JSONL. Events stay on this machine.</p></div>
+    <div class="actions"><a class="quiet" href="/sample.csv">Sample CSV ↓</a><button id="demo" class="secondary">Load synthetic demo</button><label class="primary" for="upload">Import evidence ↑</label><input id="upload" type="file" accept=".csv,.jsonl" aria-label="Import evidence file"></div>
+  </section>
+  <p id="message" role="status" aria-live="polite"></p>
+  <section class="metrics" aria-label="Workspace summary">
+    <article><span>EVENTS LOADED</span><strong id="metric-events">0</strong><small>Normalized · deduplicated</small></article>
+    <article><span>FAILED SIGN-INS</span><strong id="metric-failures">0</strong><small>Evidence, not a verdict</small></article>
+    <article><span>REVIEW CANDIDATES</span><strong id="metric-findings">0</strong><small>3 transparent detection rules</small></article>
+    <article><span>SOURCE ADDRESSES</span><strong id="metric-sources">0</strong><small>IPv4 / IPv6 supported</small></article>
+  </section>
+  <div class="review-grid">
+    <section class="panel findings"><div class="panel-heading"><div><span class="eyebrow">REVIEW QUEUE</span><h2>Patterns worth investigating</h2></div><span class="pill">Human review required</span></div>
+      <div class="filters"><input id="search" aria-label="Search findings" placeholder="Search user, host or source IP"><select id="status-filter" aria-label="Filter by case status"><option value="">All statuses</option><option>new</option><option>reviewing</option><option>dismissed</option><option>escalated</option></select></div>
+      <div id="findings" class="finding-list"></div><p id="empty">No candidates yet. Load the synthetic demo or import evidence.</p>
+      <div class="panel-foot">Rules flag patterns. Context determines the next step.</div>
+    </section>
+    <section class="panel case-panel" aria-label="Investigation detail"><div id="case-empty"><span class="eyebrow">INVESTIGATION</span><h2>A finding is a starting point.</h2><p>Select a candidate to inspect its event timeline, source fingerprints and review notes.</p><div class="flow"><span>01<br><b>Observe</b></span><span>02<br><b>Validate</b></span><span>03<br><b>Document</b></span></div></div>
+      <div id="case" hidden><div class="panel-heading"><div><span class="eyebrow" id="case-id"></span><h2 id="case-title"></h2></div><span class="pill" id="case-severity"></span></div>
+      <p id="case-description"></p><div class="context-note"><b>Check the alternative</b><p id="case-alternative"></p></div>
+      <div class="timeline-heading"><h3>Evidence timeline</h3><span>UTC</span></div><ol id="timeline"></ol>
+      <label for="case-status">Review status</label><select id="case-status"><option>new</option><option>reviewing</option><option>dismissed</option><option>escalated</option></select>
+      <label for="case-note">Investigation note</label><textarea id="case-note" maxlength="4000" rows="4" placeholder="Observation → context checked → next step"></textarea>
+      <div class="case-actions"><button class="primary" id="save">Save review</button><a class="quiet" id="export">Export case JSON ↓</a></div><small class="disclaimer">Fingerprints identify content; they do not authenticate a log source.</small></div>
+    </section>
+  </div>
+  <section class="panel source-panel"><div class="panel-heading"><div><span class="eyebrow">PROVENANCE</span><h2>Imported evidence</h2></div><small>SHA-256 of the original file bytes</small></div><div id="imports"></div></section>
+  <footer>Synthetic demo data is labelled as learning material. No live monitoring, attribution or automated response.</footer>
+</main>
+</body></html>

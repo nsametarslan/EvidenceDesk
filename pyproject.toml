@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "evidencedesk"
+version = "0.1.0"
+description = "Local, evidence-first authentication event triage workspace"
+requires-python = ">=3.12"
+dependencies = ["Flask>=3.1.3,<3.2", "waitress>=3.0.2,<4"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.4,<9"]
+
+[project.scripts]
+evidencedesk = "evidencedesk.__main__:main"
+
+[tool.setuptools.package-data]
+evidencedesk = ["templates/*.html", "static/*", "samples/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

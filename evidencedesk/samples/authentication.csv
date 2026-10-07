@@ -1,0 +1,17 @@
+timestamp,user,source_ip,host,outcome,log_source
+2026-10-07T08:00:00Z,demo.alex,203.0.113.24,lab-gateway,failure,synthetic-demo
+2026-10-07T08:01:00Z,demo.alex,203.0.113.24,lab-gateway,failure,synthetic-demo
+2026-10-07T08:02:00Z,demo.alex,203.0.113.24,lab-gateway,failure,synthetic-demo
+2026-10-07T08:03:00Z,demo.alex,203.0.113.24,lab-gateway,failure,synthetic-demo
+2026-10-07T08:04:00Z,demo.alex,203.0.113.24,lab-gateway,failure,synthetic-demo
+2026-10-07T08:05:00Z,demo.alex,203.0.113.24,lab-gateway,success,synthetic-demo
+2026-10-07T08:20:00Z,demo.casey,198.51.100.61,lab-idp,failure,synthetic-demo
+2026-10-07T08:21:00Z,demo.jordan,198.51.100.61,lab-idp,failure,synthetic-demo
+2026-10-07T08:22:00Z,demo.morgan,198.51.100.61,lab-idp,failure,synthetic-demo
+2026-10-07T08:23:00Z,demo.riley,198.51.100.61,lab-idp,failure,synthetic-demo
+2026-10-07T08:24:00Z,demo.taylor,198.51.100.61,lab-idp,failure,synthetic-demo
+2026-10-07T08:30:00Z,demo.sam,192.0.2.15,lab-workstation,success,synthetic-demo
+2026-10-07T08:32:00Z,demo.lee,192.0.2.18,lab-workstation,success,synthetic-demo
+2026-10-07T08:33:00Z,demo.pat,2001:db8::18,lab-workstation,success,synthetic-demo
+2026-10-07T08:34:00Z,demo.sam,192.0.2.15,lab-workstation,failure,synthetic-demo
+2026-10-07T08:35:00Z,demo.sam,192.0.2.15,lab-workstation,success,synthetic-demo
