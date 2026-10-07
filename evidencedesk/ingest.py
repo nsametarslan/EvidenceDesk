@@ -55,7 +55,10 @@ def parse_upload(data, filename):
     suffix = filename.lower().rsplit(".", 1)[-1]
     if suffix == "csv":
         reader = csv.DictReader(io.StringIO(text), strict=True)
-        columns = reader.fieldnames
+        try:
+            columns = reader.fieldnames
+        except csv.Error as exc:
+            raise ImportProblem('Malformed CSV header; no events were imported.') from exc
         if not columns or len(columns) != len(set(columns)) or not set(FIELDS[:-1]) <= set(columns) or not set(columns) <= set(FIELDS):
             raise ImportProblem("CSV headers must match the documented canonical schema.")
         rows = reader

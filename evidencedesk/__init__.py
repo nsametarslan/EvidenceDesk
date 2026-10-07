@@ -4,7 +4,6 @@ import json
 import secrets
 import sqlite3
 from pathlib import Path
-from urllib.parse import urlsplit
 from flask import Flask, abort, jsonify, render_template, request, session, Response
 from werkzeug.exceptions import HTTPException
 from . import storage
@@ -35,7 +34,7 @@ def create_app(data_dir=None, testing=False):
                 abort(403, description="Cross-site changes are not allowed.")
             expected = session.get("csrf", "")
             given = request.headers.get("X-CSRF-Token", "")
-            if not expected or not hmac.compare_digest(expected, given):
+            if not expected or not hmac.compare_digest(expected.encode(), given.encode()):
                 abort(403, description="Refresh the workspace and retry; CSRF validation failed.")
 
     @app.after_request

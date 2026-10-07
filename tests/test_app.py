@@ -78,6 +78,7 @@ def test_invalid_case_updates(client, payload):
 def test_csrf_origin_and_host_guard(client):
     assert client.post('/api/demo').status_code == 403
     assert client.post('/api/demo', headers={'X-CSRF-Token': 'wrong'}).status_code == 403
+    assert client.post('/api/demo', headers={'X-CSRF-Token': '\u00e9'}).status_code == 403
     valid = headers(client)
     assert client.post('/api/demo', headers={**valid, 'Origin': 'https://evil.example'}).status_code == 403
     assert client.post('/api/demo', headers={**valid, 'Sec-Fetch-Site': 'cross-site'}).status_code == 403

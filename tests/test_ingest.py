@@ -45,3 +45,7 @@ def test_bom_jsonl():
 def test_csv_extra_value_is_rejected():
     data = b'timestamp,user,source_ip,host,outcome\n2026-10-07T08:00:00Z,demo,203.0.113.1,lab,failure,extra\n'
     with pytest.raises(ImportProblem): parse_upload(data, 'a.csv')
+
+
+def test_malformed_quoted_header_is_rejected():
+    with pytest.raises(ImportProblem): parse_upload(b'"unterminated', 'a.csv')
