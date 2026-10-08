@@ -42,6 +42,8 @@ Windows / Python 3.12. Tests use temporary databases and synthetic inputs only.
 * Bandit 1.9.4, all five application Python modules: no reported issues; no skipped checks or `nosec` suppressions. It does not analyse browser JavaScript, prove authorization or detect every flaw.
 * pip-audit 2.10.1 against the complete exact-version 14-package manifest: after upgrade, **no known vulnerabilities reported**. `--no-deps --disable-pip` audited every listed package; ranges, build tools and packages outside that manifest are not a fully locked supply chain.
 * New tests cover invalid Unicode, atomic rollback, saved-note preservation, duplicate JSON keys, excessive nesting, valid international text, session tampering, cross-session CSRF, traversal, SQL/HTML-shaped evidence, multipart limits and generic database errors.
+* Actual patched-app browser exercise: demo loaded, candidate selected, multilingual HTML/SQL-shaped note saved as text, and JSON attachment downloaded and inspected (six evidence records, saved status and note). No JavaScript execution or database loss was observed during this limited exercise; it is not comprehensive browser fuzzing.
+* Publication heuristic scan after review documentation: **25 text files scanned, zero items requiring review**. This scanner has limited patterns and does not prove that no secret exists in repository history or images.
 
 No critical exploitable issue was established within this scoped local review. This statement does **not** make EvidenceDesk safe for network hosting. Residual boundaries above remain mandatory.
 
