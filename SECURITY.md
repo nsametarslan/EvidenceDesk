@@ -22,7 +22,9 @@ The database and exported JSON reports are unencrypted. Restrict filesystem perm
 
 ## Residual risks
 
-Same-user local processes may bypass browser protections. A user can deliberately supply misleading logs. Resource limits are application limits, not OS isolation; do not use hostile inputs without additional containment. Correlation can miss attacks or flag benign behaviour. No production validation or formal security audit is claimed. SQLite snapshots preserve review context but are editable by anyone who can modify the database.
+Same-user local processes may bypass browser protections. A user can deliberately supply misleading logs. Resource limits are application limits, not OS isolation; do not use hostile inputs without additional containment. Repeated distinct imports and saved snapshots can grow disk usage even when the unique-event cap is respected. Correlation can miss attacks or flag benign behaviour. No production validation or independent security audit is claimed. SQLite snapshots preserve review context but are editable by anyone who can modify the database.
+
+The [8 October 2026 scoped review](docs/SECURITY_REVIEW_2026-10-08.md) records reproduced input-handling problems, fixes, executed tests, dependency scanning and remaining boundaries. It is not a security certification.
 
 Do not expose this app with a reverse proxy, tunnel or `0.0.0.0`. Multi-user hosting requires a different threat model, authentication, TLS, access control, logging and independent review.
 

@@ -44,4 +44,6 @@ Python: doğrulama ve zaman penceresi mantığı okunabilir; bildiğin temele ya
 
 ## Gerçekten anlamak için 20 dakikalık çalışma
 
+8 Ekim güvenlik düzeltmesini anlatırken: JSON içinde aynı alanın iki kez gelmesi neden belirsizlik yaratır? Geçersiz Unicode neden SQLite/hash aşamasından önce reddedilmelidir? İç içe JSON hatası nasıl 400 yanıtına çevrilir? `tests/test_security.py` içindeki notun korunması testini çalıştır ve önceki incelemenin neden değişmediğini açıkla. pytest açığı çalışma zamanını değil UNIX test ortamındaki geçici dizin kullanımını etkiler; bunu uygulamada uzaktan sömürülen bir açık gibi anlatma.
+
 Demoyu yükle, 6 olaylı adayı aç. Son başarıyı örnek dosyada kaldırıp ayrı bir yerel veri dizinine yükle: hangi bulgu kayboldu? Bir zamanı timezone olmadan yaz: neden dosya reddediliyor? Aynı dosyayı iki kez yükle: sayaç değişiyor mu? `rules.py` içindeki 10 dakikayı değiştirip sınır testini çalıştır: testin neyi koruduğunu kendi cümlenle anlat. Değişikliklerini public yapmadan önce testleri ve secret kontrolünü tekrar çalıştır.

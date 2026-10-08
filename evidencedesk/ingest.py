@@ -15,12 +15,25 @@ class ImportProblem(ValueError):
     pass
 
 
+def has_surrogates(value):
+    return any(0xD800 <= ord(c) <= 0xDFFF for c in value)
+
+
+def unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ImportProblem("JSON objects must not contain duplicate fields.")
+        result[key] = value
+    return result
+
+
 def clean_text(value, field, limit=160):
     if not isinstance(value, str) or not value.strip():
         raise ImportProblem(f"{field} must be a non-empty string.")
     value = value.strip()
-    if len(value) > limit or any(ord(c) < 32 or ord(c) == 127 for c in value):
-        raise ImportProblem(f"{field} is too long or contains control characters.")
+    if len(value) > limit or has_surrogates(value) or any(ord(c) < 32 or ord(c) == 127 for c in value):
+        raise ImportProblem(f"{field} is too long or contains invalid text characters.")
     return value
 
 
@@ -67,7 +80,7 @@ def parse_upload(data, filename):
             for line in text.splitlines():
                 if not line.strip():
                     raise ImportProblem("JSONL must contain one event per line, without blank lines.")
-                yield json.loads(line)
+                yield json.loads(line, object_pairs_hook=unique_object)
         rows = json_rows()
     else:
         raise ImportProblem("Only .csv and .jsonl files are supported.")

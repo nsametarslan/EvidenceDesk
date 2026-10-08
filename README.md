@@ -63,7 +63,7 @@ timestamp,user,source_ip,host,outcome,log_source
 2026-10-07T08:00:00Z,demo.alex,203.0.113.24,lab-gateway,failure,synthetic-demo
 ```
 
-The first five columns are required; `log_source` is optional. `outcome` must be `success` or `failure`. Every timestamp needs an explicit timezone. Text fields are capped at 160 characters and reject control characters. Unknown fields and duplicate headers are rejected. JSONL uses the same keys, one object per line. Maximum: **2 MiB / 20,000 events per file; 50,000 unique events per workspace**.
+The first five columns are required; `log_source` is optional. `outcome` must be `success` or `failure`. Every timestamp needs an explicit timezone. Text fields are capped at 160 characters and reject control characters and invalid Unicode surrogates. Unknown fields, duplicate CSV headers and duplicate JSON object keys are rejected. JSONL uses the same keys, one object per line. Maximum: **2 MiB / 20,000 events per file; 50,000 unique events per workspace**.
 
 Map a Windows, Linux or cloud export to this schema before import. There is no native Event ID, syslog or provider-specific adapter in this release. Canonical records with identical values, including timestamp and source label, collapse into one event; this is useful for repeat exports but can collapse indistinguishable genuine events. Original file bytes are fingerprinted, **not retained**. Keep original logs separately if your process requires them. The sample uses reserved documentation addresses and fictional identities only.
 

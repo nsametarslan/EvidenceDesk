@@ -1,5 +1,11 @@
 # v0.1 validation
 
+## Security maintenance — 8 October 2026
+
+Today's baseline run: **45 passed in 0.85s**. After input-boundary fixes and the pytest 9.0.3 update: **64 passed in 0.86s** (19 new adversarial cases). Bandit reported no issues in application Python modules; pip-audit reported no known vulnerabilities in the 14-package tested manifest after the update. `pip check` passed. Scope, reproduction evidence and remaining risks are recorded in [the dated security review](SECURITY_REVIEW_2026-10-08.md). These checks do not validate internet hosting.
+
+## Original functional validation — 7 October 2026
+
 Validation date: 7 October 2026. Environment: Windows, Python 3.12, Flask 3.1.3, Waitress 3.0.2; exact runtime dependencies in `requirements-tested.txt`.
 
 * Editable installation through the documented `pip install -e ".[dev]"` completed successfully.

@@ -7,7 +7,7 @@ from pathlib import Path
 from flask import Flask, abort, jsonify, render_template, request, session, Response
 from werkzeug.exceptions import HTTPException
 from . import storage
-from .ingest import ImportProblem, MAX_BYTES, parse_upload
+from .ingest import ImportProblem, MAX_BYTES, has_surrogates, parse_upload, unique_object
 
 
 def create_app(data_dir=None, testing=False):
@@ -34,7 +34,7 @@ def create_app(data_dir=None, testing=False):
                 abort(403, description="Cross-site changes are not allowed.")
             expected = session.get("csrf", "")
             given = request.headers.get("X-CSRF-Token", "")
-            if not expected or not hmac.compare_digest(expected.encode(), given.encode()):
+            if not expected or not given.isascii() or not hmac.compare_digest(expected, given):
                 abort(403, description="Refresh the workspace and retry; CSRF validation failed.")
 
     @app.after_request
@@ -99,14 +99,19 @@ def create_app(data_dir=None, testing=False):
     def update(identity):
         if storage.detail(path, identity) is None:
             abort(404, description="Finding not found.")
-        payload = request.get_json()
+        if not request.is_json:
+            abort(415, description="Case updates require application/json.")
+        try:
+            payload = json.loads(request.get_data(), object_pairs_hook=unique_object)
+        except (ValueError, UnicodeDecodeError, RecursionError):
+            abort(400, description="Invalid case JSON; use unique status and note fields.")
         if not isinstance(payload, dict) or set(payload) != {"status", "note"}:
             abort(400, description="Provide status and note.")
         status, note = payload["status"], payload["note"]
         if not isinstance(status, str) or status not in {"new", "reviewing", "dismissed", "escalated"}:
             abort(400, description="Unknown case status.")
-        if not isinstance(note, str) or len(note) > 4000 or any((ord(c) < 32 and c not in "\n\r\t") or ord(c) == 127 for c in note):
-            abort(400, description="Notes must be text, at most 4,000 characters, without control characters.")
+        if not isinstance(note, str) or len(note) > 4000 or has_surrogates(note) or any((ord(c) < 32 and c not in "\n\r\t") or ord(c) == 127 for c in note):
+            abort(400, description="Notes must be valid Unicode text, at most 4,000 characters, without control characters.")
         storage.save_case(path, identity, status, note)
         return jsonify(saved=True)
 
