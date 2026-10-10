@@ -104,7 +104,7 @@ It does not ingest live traffic, contact target systems, validate log signatures
 
 Automated tests cover invalid input, timezone conversion, window boundaries, benign non-matches, deduplication, atomicity, case persistence, late evidence, CSRF/origin/host protections and report handling. The screenshot above comes from the running app; the demo is labelled synthetic. Browser checks and exact results are recorded in [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
-The next milestone is one well-tested Windows authentication export adapter with an explicit mapping preview. After that: configurable thresholds with versioned rule metadata, audited note history, performance profiling and retention controls. Cloud-provider adapters are future work, not current capabilities.
+A read-only [Windows Security CSV mapping preview](docs/WINDOWS_MAPPING_PREVIEW.md) is available as a separate CLI. It validates explicit column mappings and shows a bounded sample without importing events or modifying the app database. Only flattened 4624/4625 CSV is supported; a complete native Windows export adapter remains future work. After that: configurable thresholds with versioned rule metadata, audited note history, performance profiling and retention controls. Cloud-provider adapters are future work, not current capabilities.
 
 ## Project context
 
