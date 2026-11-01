@@ -78,3 +78,67 @@ def test_cli_success_and_missing_file(tmp_path, capsys):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "private-name" not in captured.err
+
+
+def test_normalized_csv_roundtrip_preserves_all_rows():
+    from evidencedesk.windows_preview import normalized_csv
+    from evidencedesk.ingest import parse_upload
+    data = (HEADER + ROW * 7 + ROW.replace("4625", "4624")).encode()
+    output = normalized_csv(data, json.dumps(MAPPING).encode())
+    events = parse_upload(output.encode(), "normalized.csv")
+    assert len(events) == 8
+    assert events[-1]["outcome"] == "success"
+    assert events[0]["timestamp"] == "2026-10-09T07:00:00.000000Z"
+    assert "ignored-subject" not in output
+
+
+def test_normalized_cli_rejects_late_bad_row_without_output(tmp_path, capsys):
+    csv_file = tmp_path / "events.csv"
+    mapping = tmp_path / "mapping.json"
+    csv_file.write_text(HEADER + ROW * 6 + ROW.replace("4625", "9999"))
+    mapping.write_text(json.dumps(MAPPING))
+    assert main([str(csv_file), "--mapping", str(mapping), "--normalized-csv"]) == 2
+    assert capsys.readouterr().out == ""
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["events.csv", "mapping.json"]
+
+
+def test_normalized_output_size_limit(monkeypatch):
+    from evidencedesk.windows_preview import normalized_csv
+    monkeypatch.setattr("evidencedesk.ingest.MAX_BYTES", 10)
+    with pytest.raises(ImportProblem, match="2 MiB"):
+        normalized_csv((HEADER + ROW).encode(), json.dumps(MAPPING).encode())
+
+
+def test_cli_to_workspace_end_to_end(tmp_path):
+    import io
+    import subprocess
+    import sys
+    from evidencedesk import create_app
+    source = tmp_path / "windows.csv"
+    mapping = tmp_path / "mapping.json"
+    # Five distinct failures followed by a success: real CLI, then web API.
+    rows = [ROW.replace("10:00:00", f"10:0{i}:00") for i in range(5)]
+    rows.append(ROW.replace("10:00:00", "10:05:00").replace("4625", "4624"))
+    source.write_text(HEADER + "".join(rows), encoding="utf-8")
+    mapping.write_text(json.dumps(MAPPING), encoding="utf-8")
+    result = subprocess.run([sys.executable, "-m", "evidencedesk.windows_preview",
+        str(source), "--mapping", str(mapping), "--normalized-csv"], capture_output=True)
+    assert result.returncode == 0, result.stderr
+    client = create_app(tmp_path / "workspace", testing=True).test_client()
+    client.get("/")
+    with client.session_transaction() as session:
+        headers = {"X-CSRF-Token": session["csrf"]}
+    def upload():
+        return client.post("/api/import", headers=headers,
+            data={"file": (io.BytesIO(result.stdout), "normalized.csv")})
+    assert upload().json["added"] == 6
+    workspace = client.get("/api/workspace").json
+    assert workspace["summary"]["events"] == 6
+    finding = next(f for f in workspace["findings"] if f["rule"] == "success_after_failures")
+    identity = finding["id"]
+    assert client.post(f"/api/findings/{identity}", headers=headers,
+        json={"status": "reviewing", "note": "Synthetic CSV handoff verified"}).status_code == 200
+    report = client.get(f"/api/findings/{identity}/export").json
+    assert report["finding"]["note"] == "Synthetic CSV handoff verified"
+    assert upload().json["added"] == 0
+    assert client.get("/api/workspace").json["summary"]["events"] == 6
