@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from .ingest import MAX_BYTES, MAX_ROWS, ImportProblem, clean_text, normalize, unique_object
+from .ingest import FIELDS, MAX_BYTES, MAX_ROWS, ImportProblem, clean_text, normalize, parse_upload, unique_object
 
 MAPPING_FIELDS = {"timestamp", "user", "source_ip", "host", "event_id"}
 OUTCOMES = {"4624": "success", "4625": "failure"}
@@ -30,7 +30,7 @@ def parse_mapping(data):
     return mapping
 
 
-def preview(data, mapping_data):
+def _validate(data, mapping_data, collect=False):
     """Validate every row before returning a bounded preview; never import events."""
     mapping = parse_mapping(mapping_data)
     if not data or len(data) > MAX_BYTES:
@@ -66,7 +66,7 @@ def preview(data, mapping_data):
                 raise ImportProblem(f"Row {total}: {exc}") from exc
             ids.add(event["id"])
             counts[event["outcome"]] += 1
-            if len(samples) < PREVIEW_ROWS:
+            if collect or len(samples) < PREVIEW_ROWS:
                 samples.append(event)
     except csv.Error as exc:
         raise ImportProblem("Malformed CSV; no preview was produced.") from exc
@@ -84,6 +84,28 @@ def preview(data, mapping_data):
     }
 
 
+def preview(data, mapping_data):
+    """Validate all rows and return at most five samples."""
+    return _validate(data, mapping_data)
+
+
+def normalized_csv(data, mapping_data):
+    """Return importable CSV only after complete validation; never touch SQLite.
+
+    The caller chooses where to save it. Import provenance fingerprints this
+    derived CSV, not the original Windows export; retain the original separately.
+    """
+    result = _validate(data, mapping_data, collect=True)
+    output = io.StringIO(newline="")
+    writer = csv.DictWriter(output, fieldnames=FIELDS, extrasaction="ignore")
+    writer.writeheader()
+    writer.writerows(result["sample_events"])
+    encoded = output.getvalue().encode("utf-8")
+    # Normalization can expand input; enforce the web import contract as well.
+    parse_upload(encoded, "normalized.csv")
+    return encoded.decode("utf-8")
+
+
 def _read_bounded(path, limit):
     with Path(path).open("rb") as stream:
         return stream.read(limit + 1)
@@ -93,16 +115,21 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("csv_file", help="Local flattened Security-event CSV; not EVTX/XML")
     parser.add_argument("--mapping", required=True, help="Local explicit field-mapping JSON")
+    parser.add_argument("--normalized-csv", action="store_true", help="Write fully validated canonical CSV to stdout instead of a preview; does not import")
     args = parser.parse_args(argv)
     try:
-        result = preview(_read_bounded(args.csv_file, MAX_BYTES), _read_bounded(args.mapping, MAX_MAPPING_BYTES))
+        convert = normalized_csv if args.normalized_csv else preview
+        result = convert(_read_bounded(args.csv_file, MAX_BYTES), _read_bounded(args.mapping, MAX_MAPPING_BYTES))
     except OSError:
         print("Cannot read the local input files.", file=sys.stderr)
         return 2
     except ImportProblem as exc:
         print(str(exc), file=sys.stderr)
         return 2
-    print(json.dumps(result, ensure_ascii=True, indent=2))
+    if args.normalized_csv:
+        sys.stdout.write(result)
+    else:
+        print(json.dumps(result, ensure_ascii=True, indent=2))
     return 0
 
 
