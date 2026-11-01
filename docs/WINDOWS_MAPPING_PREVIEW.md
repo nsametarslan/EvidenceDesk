@@ -63,3 +63,9 @@ Microsoft references: [4624](https://learn.microsoft.com/windows/security/threat
 and [4625](https://learn.microsoft.com/windows/security/threat-protection/auditing/event-4625).
 
 This is a narrow preview, not a complete Windows log adapter or production SIEM.
+
+## Canonical CSV handoff
+
+After inspecting the preview, add `--normalized-csv` to the same CLI command to emit all validated rows as canonical CSV on stdout. Save the output as a new `.csv` file and select it in the existing web import control. This is an explicit handoff, not automatic ingestion; the CLI never opens SQLite. Preview mode remains unchanged.
+
+All rows and the derived CSV size are validated before any stdout is emitted. A rejected command exits with status 2; shell redirection may still create an empty file, so check the exit status before importing. Use a new output path: never redirect over the input CSV or mapping. Output contains sensitive authentication data. Keep both original logs and mapping separately: the application's source fingerprint will identify the derived CSV, not the original Windows bytes. No claim of original-file provenance is made. Duplicate canonical rows use the existing import deduplication behavior.
