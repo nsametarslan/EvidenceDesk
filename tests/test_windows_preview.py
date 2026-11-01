@@ -78,3 +78,32 @@ def test_cli_success_and_missing_file(tmp_path, capsys):
     captured = capsys.readouterr()
     assert captured.out == ""
     assert "private-name" not in captured.err
+
+
+def test_normalized_csv_roundtrip_preserves_all_rows():
+    from evidencedesk.windows_preview import normalized_csv
+    from evidencedesk.ingest import parse_upload
+    data = (HEADER + ROW * 7 + ROW.replace("4625", "4624")).encode()
+    output = normalized_csv(data, json.dumps(MAPPING).encode())
+    events = parse_upload(output.encode(), "normalized.csv")
+    assert len(events) == 8
+    assert events[-1]["outcome"] == "success"
+    assert events[0]["timestamp"] == "2026-10-09T07:00:00.000000Z"
+    assert "ignored-subject" not in output
+
+
+def test_normalized_cli_rejects_late_bad_row_without_output(tmp_path, capsys):
+    csv_file = tmp_path / "events.csv"
+    mapping = tmp_path / "mapping.json"
+    csv_file.write_text(HEADER + ROW * 6 + ROW.replace("4625", "9999"))
+    mapping.write_text(json.dumps(MAPPING))
+    assert main([str(csv_file), "--mapping", str(mapping), "--normalized-csv"]) == 2
+    assert capsys.readouterr().out == ""
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["events.csv", "mapping.json"]
+
+
+def test_normalized_output_size_limit(monkeypatch):
+    from evidencedesk.windows_preview import normalized_csv
+    monkeypatch.setattr("evidencedesk.ingest.MAX_BYTES", 10)
+    with pytest.raises(ImportProblem, match="2 MiB"):
+        normalized_csv((HEADER + ROW).encode(), json.dumps(MAPPING).encode())
