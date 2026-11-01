@@ -107,3 +107,38 @@ def test_normalized_output_size_limit(monkeypatch):
     monkeypatch.setattr("evidencedesk.ingest.MAX_BYTES", 10)
     with pytest.raises(ImportProblem, match="2 MiB"):
         normalized_csv((HEADER + ROW).encode(), json.dumps(MAPPING).encode())
+
+
+def test_cli_to_workspace_end_to_end(tmp_path):
+    import io
+    import subprocess
+    import sys
+    from evidencedesk import create_app
+    source = tmp_path / "windows.csv"
+    mapping = tmp_path / "mapping.json"
+    # Five distinct failures followed by a success: real CLI, then web API.
+    rows = [ROW.replace("10:00:00", f"10:0{i}:00") for i in range(5)]
+    rows.append(ROW.replace("10:00:00", "10:05:00").replace("4625", "4624"))
+    source.write_text(HEADER + "".join(rows), encoding="utf-8")
+    mapping.write_text(json.dumps(MAPPING), encoding="utf-8")
+    result = subprocess.run([sys.executable, "-m", "evidencedesk.windows_preview",
+        str(source), "--mapping", str(mapping), "--normalized-csv"], capture_output=True)
+    assert result.returncode == 0, result.stderr
+    client = create_app(tmp_path / "workspace", testing=True).test_client()
+    client.get("/")
+    with client.session_transaction() as session:
+        headers = {"X-CSRF-Token": session["csrf"]}
+    def upload():
+        return client.post("/api/import", headers=headers,
+            data={"file": (io.BytesIO(result.stdout), "normalized.csv")})
+    assert upload().json["added"] == 6
+    workspace = client.get("/api/workspace").json
+    assert workspace["summary"]["events"] == 6
+    finding = next(f for f in workspace["findings"] if f["rule"] == "success_after_failures")
+    identity = finding["id"]
+    assert client.post(f"/api/findings/{identity}", headers=headers,
+        json={"status": "reviewing", "note": "Synthetic CSV handoff verified"}).status_code == 200
+    report = client.get(f"/api/findings/{identity}/export").json
+    assert report["finding"]["note"] == "Synthetic CSV handoff verified"
+    assert upload().json["added"] == 0
+    assert client.get("/api/workspace").json["summary"]["events"] == 6
